@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html>
+    <script src="https://d3js.org/d3.v5.min.js"></script>
+    <head>
+        <title>Evolution of US Employment Over Time</title>
+        <style type="text/css">
+            span.annotation {
+                display: block;
+                width: 600px;
+                height: 73px;
+                padding: 5px;
+                border: 3px solid #a9a9a9;
+                background-color: #f5f5dc;
+            }
+
+            h1 {
+                white-space: nowrap;
+                overflow: hidden;
+                font-size: 60px;
+                padding-left: 170px;              
+                padding-top: 10px;
+                margin: 0px;              
+            }
+
+            h2 {
+                white-space: nowrap;
+                overflow: hidden;
+                padding-left: 303px;
+                padding-bottom: 30px;
+                padding-top: 0px;              
+                margin: 0px;              
+            }
+
+            body {
+                font-family: "Open Sans", sans-serif;
+            }
+
+            .font {
+                font-size: 18px;
+            }
+
+            .legend {
+                font-size: 14px;
+            }
+            rect {
+                stroke-width: 2;
+            }
+
+            .tooltip {
+                background: #eee;
+                box-shadow: 0 0 3px #999999;
+                color: #333;
+                display: none;
+                font-size: 18px;
+                left: 130px;
+                padding: 10px;
+                position: absolute;
+                text-align: center;
+                top: 95px;
+                width: 160px;
+                z-index: 10;
+            }
+
+            div.yearNav {
+                white-space: nowrap;
+                overflow: hidden;
+                padding-left: 147px;
+            }
+
+            ul {
+                list-style-type: none;
+                margin: 0;
+                overflow: hidden;
+                padding: 0px 0px;
+            }
+
+            li {
+                float: left;
+                display: block;
+                color: black;
+                text-align: center;
+                padding: 14px 16px;
+                text-decoration: none;
+            }
+
+            li a {
+                float: left;
+                display: block;
+                color: black;
+                text-decoration: none;
+            }
+
+            .highlight {
+                background-color: lightgreen;
+            }
+
+            .highlight:hover:not(.active) {
+                background-color: green;
+            }
+
+            .active {
+                background-color: lightblue;
+            }
+
+            .arrow {
+                border: solid black;
+                border-width: 0 3px 3px 0;
+                display: inline-block;
+                padding: 3px;
+            }
+
+            .right {
+                transform: rotate(-45deg);
+                -webkit-transform: rotate(-45deg);
+            }
+
+            .left {
+                transform: rotate(135deg);
+                -webkit-transform: rotate(135deg);
+            }
+        </style>
+    </head>
+    <body>
+        <h1>Times Are A-Changin'</h1>
+        <h2>US Employment by Sector.</h2>
+        <div class="yearNav">
+          <ul>
+              <a href="2000.html">
+                  <li class="highlight"><i class="arrow left"></i> Back in Time</li>
+              </a>
+              <li>1850</li>
+              <li>1900</li>
+              <li>1950</li>
+              <li>2000</li>
+              <li class="active">2050</li>
+              <a href="">
+                  <li class="highlight">Into the Future <i class="arrow right"></i></li>
+              </a>
+          </ul>
+        </div>
+
+        <div>
+            <svg width="1102" height="870"></svg>
+            <div class="tooltip"></div>
+        </div>
+
+        <div style="padding-left: 150px; padding-bottom: 100px;">
+            <span class="annotation">
+                No one knows for sure what employment will look like in 2050, but it is bound to look different than it does today. Fighting complacency and continuing to learn new skills is the best way to succeed in the economy of tomorrow.<br>
+                <b>"The only constant in life is change." -Heraclitus</b>
+            </span>
+        </div>
+    </body>
+
+    <script>
+        var data = [6.5, 6.5, 6.5, 6.5, 6.5, 6.5, 6.5, 6.5, 6.5, 6.5, 6.5, 6.5, 6.5, 6.5, 6.5, 6.5];
+        var category = [
+            "Trade (retail & wholesale)",
+            "Construction",
+            "Transportation",
+            "Agriculture",
+            "Manufacturing",
+            "Mining",
+            "Household Work",
+            "Professional Services",
+            "Utilities",
+            "Business + Repair Services",
+            "Telecommunications",
+            "Healthcare",
+            "Entertainment",
+            "Education",
+            "Government",
+            "Financial Services",
+        ];
+        var color = ["#4e79a7", "#f28e2c", "#e15759", "#76b7b2", "#59a14f", "#edc949", "#af7aa1", "#ff9da7", "#9c755f", "#bab0ab", "#7fc97f", "#beaed4", "#fdc086", "#ffff99", "#386cb0", "#f0027f"];
+        var legendWidth = 25;
+        var legendSpacing = 6;
+
+        var pie = d3.pie();
+        var arc = d3.arc().innerRadius(0).outerRadius(400);
+        var g = d3.select("svg").append("g").attr("transform", "translate(450,450)");
+
+        var path = g
+            .selectAll("path")
+            .data(pie(data))
+            .enter()
+            .append("path")
+            .attr("d", arc)
+            .attr("fill", function (d, i) {
+                return color[i];
+            });
+
+        var tooltip = d3.select(".tooltip");
+
+        tooltip
+            .append("div")
+            .attr("class", "category");
+
+        tooltip
+            .append("div")
+            .attr("class", "percent");
+
+        path.on("mouseover", function (d, i) {
+            var total = d3.sum(data);
+            console.log(total);
+            tooltip.select(".category").html(category[i]);
+            tooltip.select(".percent").html("?%");
+            tooltip.style("display", "block");
+        });
+        path.on("mousemove", function (d) {
+            tooltip
+                .style("top", d3.event.layerY + 203 + "px")
+                .style("left", d3.event.layerX + 20 + "px");
+        });
+        path.on("mouseout", function () {
+            tooltip.style("display", "none");
+        });
+
+        var legend = g
+            .selectAll(".legend")
+            .data(category)
+            .enter()
+            .append("g")
+            .attr("class", "legend")
+            .attr("transform", function (d, i) {
+                var h = legendWidth + legendSpacing;
+                var x = 18 * legendWidth;
+                var y = i * h - (h * color.length / 2);
+                return "translate(" + x + "," + y + ")";
+            });
+
+        legend
+            .append("rect")
+            .attr("width", legendWidth)
+            .attr("height", legendWidth)
+            .style("fill", function (d, i) {
+                return color[i];
+            })
+            .style("stroke", function (d, i) {
+                return color[i];
+            });
+
+        legend
+            .append("text")
+            .attr("x", legendWidth + legendSpacing)
+            .attr("y", legendWidth - legendSpacing)
+            .text(function (d) {
+                return d;
+            });
+    </script>
+</html>
